@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.ex02.BoardMapper">
+
+	<!-- 첨부파일 1개 삭제 -->
+	<delete id="deleteAttach">
+		delete from tbl_attach
+		where fullname = #{fullname}
+	</delete>
+
+	<!-- 첨부파일 목록 -->
+	<select id="getAttachList" resultType="string">
+		select fullname from tbl_attach
+		where bno = #{bno}
+	</select>
+
+	<!-- 다음 시퀀스 얻기 -->
+	<select id="getNextSeq" resultType="int">
+		select seq_board_bno.nextval
+		from dual
+	</select>
+	
+	<!-- 첨부파일 테이블에 추가 -->
+	<insert id="insertAttach">
+		insert into tbl_attach(fullname, bno)
+		values (#{fullname}, #{bno})
+	</insert>
+	
+	<!-- 댓글갯수 업데이트 -->
+	<update id="updateReplycnt">
+		update tbl_board set
+			replycnt = replycnt + #{amount}
+		where bno = #{bno}
+	</update>
+
+	<!-- 글쓰기 -->
+	<insert id="create">
+		insert into tbl_board
+			(bno, title, content, writer)
+		values
+			(#{bno}, #{title}, #{content}, #{writer})
+	</insert>
+	
+	<!-- 전체 조회 -->
+	<select id="listAll" resultType="BoardVo">
+		select * 
+		from (select rownum rnum, a.*
+		      from (select * from tbl_board
+		            <include refid="search"></include>
+		            order by bno desc) a)
+		where rnum between #{startRow} and #{endRow}
+		
+	</select>
+	
+	<!-- 특정글 조회 -->
+	<select id="read" resultType="BoardVo">
+		select * from tbl_board
+		where bno = #{bno}
+	</select>
+	
+	<!-- 글수정 -->
+	<update id="update">
+		update tbl_board set
+			title = #{boardVo.title},
+			content = #{boardVo.content}
+		where bno = #{boardVo.bno}
+		and writer = #{u_id}
+	</update>
+	
+	<!-- 글삭제 -->
+	<delete id="delete">
+		delete from tbl_board
+		where bno = #{bno}
+	</delete>
+	
+	<!-- 글갯수 -->
+	<select id="getCount" resultType="int">
+		select count(*) from tbl_board
+		<include refid="search"></include>
+	</select>
+	
+	<!-- 검색 조건 -->
+	<sql id="search">
+		<if test="keyword != null">
+	    	<choose>
+	    		<when test="searchType == 't'.toString()">
+	    			where title like '%' || #{keyword} ||'%'
+	    		</when>
+	    		<when test="searchType == 'c'.toString()">
+	    			where content like '%' || #{keyword} ||'%'
+	    			
+	    		</when>
+	    		<when test="searchType == 'w'.toString()">
+	    			where writer like '%' || #{keyword} ||'%'
+	    			
+	    		</when>
+	    		<when test="searchType == 'tc'.toString()">
+	    			where title like '%' || #{keyword} ||'%'
+	    			or content like '%' || #{keyword} || '%'
+	    		</when>
+	    		<when test="searchType == 'tcw'.toString()">
+	    			where title like '%' || #{keyword} ||'%'
+	    			or content like '%' || #{keyword} || '%'
+	    			or writer like '%' || #{writer} || '%'
+	    		</when>
+	    	</choose>
+	    </if>
+	</sql>
+</mapper>

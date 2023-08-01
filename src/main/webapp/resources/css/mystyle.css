@@ -1,0 +1,15 @@
+@charset "UTF-8";
+
+#uploadDiv {
+	width: 80%;
+	height: 150px;
+	background-color: yellow;
+	margin: 20px auto;
+	border: 2px dashed blue;
+}
+
+.uploadedItem {
+	display: none;
+	float: left;
+	width: 150px;
+}
